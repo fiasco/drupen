@@ -3,6 +3,7 @@
 namespace Drupal\drupen\Commands;
 
 use Drush\Commands\DrushCommands;
+use Symfony\Component\Routing\RouteCollection;
 
 /**
  * A Drush commandfile.
@@ -20,22 +21,25 @@ class DrupenCommands extends DrushCommands {
   /**
    * List all route entries as valid urls.
    *
-    * @param array $options An associative array of options whose values come from cli, aliases, config, etc.
+   * @param array $options An associative array of options whose values come from cli, aliases, config, etc.
    * @option route-name
    *   Filter by a single route.
    *
    * @command route:list
    * @aliases route-list
    */
-  public function list(array $options = ['route-name' => null]) {
-    // See bottom of https://weitzman.github.io/blog/port-to-drush9 for details on what to change when porting a
-    // legacy command.
+  public function routeList(array $options = ['route-name' => null]) {
+    $this->output()->writeln('Listing all routes...');
+    $route_name = $options['route-name'] ?: FALSE;
+    foreach ($this->buildRouteList($route_name) as $url) {
+      $this->output()->writeln($url);
+    }
   }
 
   /**
    * Test access to all route entries.
    *
-    * @param array $options An associative array of options whose values come from cli, aliases, config, etc.
+   * @param array $options An associative array of options whose values come from cli, aliases, config, etc.
    * @option route-name
    *   Filter by a single route.
    * @option response-code
@@ -54,7 +58,7 @@ class DrupenCommands extends DrushCommands {
    * @command route:test
    * @aliases route-test
    */
-  public function test(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
+  public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
     // See bottom of https://weitzman.github.io/blog/port-to-drush9 for details on what to change when porting a
     // legacy command.
   }
@@ -70,9 +74,59 @@ class DrupenCommands extends DrushCommands {
    * @command session:cookie
    * @aliases session-cookie
    */
-  public function cookie($username, $password) {
+  public function sessionCookie($username, $password) {
     // See bottom of https://weitzman.github.io/blog/port-to-drush9 for details on what to change when porting a
     // legacy command.
+  }
+
+  /**
+   * Build a list of routes with replacement parameters.
+   *
+   * @return \Generator
+   */
+  protected function buildRouteList($route_name = FALSE) {
+    $route_handlers = \Drupal::service('drupen.route.handler.manager')->getHandlers();
+    $collections = [];
+    $routes = [];
+
+    /** @var \Drupal\Core\Routing\RouteProvider $route_provider */
+    $route_provider = \Drupal::service('router.route_provider');
+    if ($route_name) {
+      try {
+        $routes[$route_name] = $route_provider->getRouteByName($route_name);
+      }
+      catch (RouteNotFoundException $e) {
+        drush_set_error('route_mismatch', $e->getMessage());
+        yield;
+      }
+    }
+    else {
+      $routes = $route_provider->getAllRoutes();
+    }
+
+    /** @var \Symfony\Component\Routing\Route $route */
+    foreach ($routes as $route_name => $route) {
+      /** @var \Drupal\drupen\RouteHandler\RouteHandlerInterface $route_handler */
+      foreach ($route_handlers as $handler_name => $route_handler) {
+        if ($route_handler->applies($route)) {
+          if (empty($collections[$handler_name])) {
+            $collections[$handler_name] = new RouteCollection();
+          }
+          $collections[$handler_name]->add($route_name, $route);
+          break;
+        }
+      }
+    }
+
+    foreach ($collections as $handler_name => $collection) {
+      $route_handler = $route_handlers[$handler_name];
+      foreach ($route_handler->getUrls($collection) as $url) {
+        if (!$url) {
+          continue;
+        }
+        yield $url;
+      }
+    }
   }
 
 }
