@@ -8,6 +8,7 @@
 namespace Drupal\drupen\RouteHandler;
 
 use Drupal\Core\Routing\UrlGeneratorInterface;
+use Drupal\drupen\Utils\Utils;
 use Drupal\drupen\ParamHandler\Manager as ParamManager;
 use Drupal\drupen\ParamHandler\ParameterHandlerInterface;
 use Symfony\Component\Routing\Route;
@@ -54,13 +55,13 @@ class DefaultHandler implements RouteHandlerInterface {
 
         $results = [];
         if ($replacements) {
-          generatePermutations(DRUPEN_STRING_SEPERATOR, $results, ...array_values($replacements));
+          Utils::generatePermutations(DRUPEN_STRING_SEPERATOR, $results, ...array_values($replacements));
           $keys = array_keys($replacements);
 
           foreach ($results as $result) {
             $result = explode(DRUPEN_STRING_SEPERATOR, $result);
             if (count($keys) == count($result)) {
-              yield renderLink($route_name, array_combine($keys, $result));
+              yield Utils::renderLink($route_name, array_combine($keys, $result));
             }
           }
         }
