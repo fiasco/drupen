@@ -2,7 +2,10 @@
 
 namespace Drupal\drupen\Commands;
 
+use Drupal\drupen\Utils\UrlLoader;
 use Drush\Commands\DrushCommands;
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\TransferStats;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
@@ -59,8 +62,17 @@ class DrupenCommands extends DrushCommands {
    * @aliases route-test
    */
   public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
-    // See bottom of https://weitzman.github.io/blog/port-to-drush9 for details on what to change when porting a
-    // legacy command.
+    if ($options['response-code']) {
+      $this->output()->writeln('Testing routes for \'@code\' HTTP response code.', ['@code' => $options['response-code']]);
+    }
+    else {
+      $this->output()->writeln('Testing all routes.');
+    }
+
+    foreach ($this->buildRouteList($options['route-name']) as $url) {
+      $urlLoader = new UrlLoader($options['cookie'], $options['response-code'], $options['response-cache'], $options['profile'], $options['verify-ssl'], $options['follow-redirects']);
+      $urlLoader->loadURL($url);
+    }
   }
 
   /**
