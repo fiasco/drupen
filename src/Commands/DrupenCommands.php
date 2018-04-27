@@ -3,6 +3,7 @@
 namespace Drupal\drupen\Commands;
 
 use Drupal\drupen\Utils\UrlLoader;
+use Drupal\drupen\Utils\Utils;
 use Drush\Commands\DrushCommands;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\TransferStats;
@@ -87,8 +88,30 @@ class DrupenCommands extends DrushCommands {
    * @aliases session-cookie
    */
   public function sessionCookie($username, $password) {
-    // See bottom of https://weitzman.github.io/blog/port-to-drush9 for details on what to change when porting a
-    // legacy command.
+    $url = Utils::renderLink('user.login');
+    /** @var \GuzzleHttp\Client $client */
+    $client = \Drupal::service('http_client');
+    $jar = new CookieJar();
+
+    $client->request('POST', $url,
+      [
+        'form_params' => [
+          'name' => $username,
+          'pass' => $password,
+          'form_id' => 'user_login_form',
+          'op' => 'Log in',
+        ],
+        'cookies' => $jar,
+        'allow_redirects' => [
+          'max'             => 5,
+          'referer'         => true,
+          'on_redirect'     => function($request, $response, $uri) {
+            $this->output()->writeln($response->getHeader('Set-Cookie')[0]);
+          },
+          'track_redirects' => true
+        ],
+      ]
+    );
   }
 
   /**
