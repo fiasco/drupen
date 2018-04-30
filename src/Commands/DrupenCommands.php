@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\drupen\Commands;
+namespace Drush\Commands;
 
 use Drupal\drupen\Utils\UrlLoader;
 use Drupal\drupen\Utils\Utils;
@@ -31,6 +31,7 @@ class DrupenCommands extends DrushCommands {
    *
    * @command route:list
    * @aliases route-list
+   * @bootstrap DRUSH_BOOTSTRAP_DRUPAL_FULL
    */
   public function routeList(array $options = ['route-name' => null]) {
     $this->output()->writeln('Listing all routes...');
@@ -61,6 +62,7 @@ class DrupenCommands extends DrushCommands {
    *
    * @command route:test
    * @aliases route-test
+   * @bootstrap DRUSH_BOOTSTRAP_DRUPAL_FULL
    */
   public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
     if ($options['response-code']) {
@@ -86,6 +88,7 @@ class DrupenCommands extends DrushCommands {
    *
    * @command session:cookie
    * @aliases session-cookie
+   * @bootstrap DRUSH_BOOTSTRAP_DRUPAL_FULL
    */
   public function sessionCookie($username, $password) {
     $url = Utils::renderLink('user.login');
