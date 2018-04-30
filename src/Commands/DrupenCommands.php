@@ -22,6 +22,17 @@ use Symfony\Component\Routing\RouteCollection;
  */
 class DrupenCommands extends DrushCommands {
 
+  public function __construct() {
+    $this->setupAutoloading();
+  }
+
+  /**
+   * Setup autoloading.
+   */
+  protected function setupAutoloading() {
+    require_once __DIR__ . '/../../vendor/autoload.php';
+  }
+
   /**
    * List all route entries as valid urls.
    *

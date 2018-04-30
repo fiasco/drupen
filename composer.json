@@ -17,5 +17,11 @@
                 "drush.services.yml": "^9"
             }
         }
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\drupen\\": "src/",
+            "Drush\\Commands\\": "src/Commands"
+        }
     }
 }
