@@ -8,6 +8,7 @@ use Drush\Commands\DrushCommands;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\TransferStats;
 use Symfony\Component\Routing\RouteCollection;
+use Drupal\drupen\DrupenServiceProvider;
 
 /**
  * A Drush commandfile.
@@ -31,6 +32,22 @@ class DrupenCommands extends DrushCommands {
    */
   protected function setupAutoloading() {
     require_once __DIR__ . '/../../vendor/autoload.php';
+  }
+
+  /**
+   * @hook pre-command *
+   */
+  public function pre()
+  {
+    $this->addServicesToContainer();
+  }
+
+  /**
+   * This is necessary to define our own services.
+   */
+  protected function addServicesToContainer() {
+    \Drupal::service('kernel')->addServiceModifier(new DrupenServiceProvider());
+    \Drupal::service('kernel')->rebuildContainer();
   }
 
   /**
