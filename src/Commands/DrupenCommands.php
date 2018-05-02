@@ -2,6 +2,8 @@
 
 namespace Drush\Commands;
 
+require_once __DIR__ . '/../../vendor/autoload.php';
+
 use Drush\Commands\DrushCommands;
 use Drupal\drupen\Drupen;
 use Drupal\drupen\DrupenServiceProvider;
@@ -18,17 +20,6 @@ use Drupal\drupen\DrupenServiceProvider;
  *   - http://cgit.drupalcode.org/devel/tree/drush.services.yml
  */
 class DrupenCommands extends DrushCommands {
-
-  public function __construct() {
-    $this->setupAutoloading();
-  }
-
-  /**
-   * Setup autoloading.
-   */
-  protected function setupAutoloading() {
-    require_once __DIR__ . '/../../vendor/autoload.php';
-  }
 
   /**
    * @hook pre-command *
