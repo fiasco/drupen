@@ -64,10 +64,10 @@ class Views implements RouteHandlerInterface {
       }
       $results = [];
       if ($replacements) {
-        Utils::generatePermutations(DRUPEN_STRING_SEPERATOR, $results, ...array_values($replacements));
+        Utils::generatePermutations(Utils::DRUPEN_STRING_SEPERATOR, $results, ...array_values($replacements));
         $keys = array_keys($replacements);
         foreach ($results as $result) {
-          $result = explode(DRUPEN_STRING_SEPERATOR, $result);
+          $result = explode(Utils::DRUPEN_STRING_SEPERATOR, $result);
           if (count($keys) == count($result)) {
             yield Utils::renderLink($route_name, array_combine($keys, $result));
           }

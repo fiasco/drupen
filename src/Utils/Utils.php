@@ -4,6 +4,8 @@ namespace Drupal\drupen\Utils;
 
 class Utils {
 
+  const DRUPEN_STRING_SEPERATOR = '~~~';
+
   /**
    * Helper function to generate permutations of N sized arrays.
    *

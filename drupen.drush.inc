@@ -9,8 +9,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use Drupal\drupen\DrupenServiceProvider;
 
-define("DRUPEN_STRING_SEPERATOR", "~~~");
-
 /**
  * Implementation of hook_drush_help().
  */
