@@ -10,6 +10,7 @@ use GuzzleHttp\TransferStats;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\RouteCollection;
+use Drupal\drupen\DrupenServiceProvider;
 
 
 define("DRUPEN_STRING_SEPERATOR", "~~~");
@@ -80,6 +81,15 @@ function drush_drupen_pre_route_list($profile = NULL) {
     $sites_subdir = "sites/$dir";
   }
   $conf_path = $sites_subdir;
+  addServicesToContainer();
+}
+
+/**
+ * This is necessary to define our own services.
+ */
+function addServicesToContainer() {
+  \Drupal::service('kernel')->addServiceModifier(new DrupenServiceProvider());
+  \Drupal::service('kernel')->rebuildContainer();
 }
 
 /**
@@ -330,3 +340,29 @@ function generatePermutations($separator, array &$results, array ...$arrays) {
   }
 }
 
+// @codingStandardsIgnoreStart
+/**
+ * Class DrupenDrush8Io.
+ *
+ * This is a stand in for \Symfony\Component\Console\Style\StyleInterface with
+ * drush 8 so that we don't need to depend on symfony components.
+ */
+class DrupenDrush8Io {
+
+  public function confirm($text) {
+    return drush_confirm($text);
+  }
+
+  public function success($text) {
+    drush_log($text, LogLevel::SUCCESS);
+  }
+
+  public function error($text) {
+    drush_log($text, LogLevel::ERROR);
+  }
+
+  public function text($text) {
+    drush_log($text, LogLevel::NOTICE);
+  }
+}
+// @codingStandardsIgnoreEnd

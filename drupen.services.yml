@@ -1,4 +1,6 @@
 services:
+  drupen.drupen:
+    class: Drupal\drupen\Drupen
   drupen.route.handler.manager:
     class: Drupal\drupen\RouteHandler\Manager
     tags:
