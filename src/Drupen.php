@@ -11,33 +11,17 @@ use Symfony\Component\Routing\RouteCollection;
 class Drupen {
 
   /**
-   * The io interface of the cli tool calling the method.
-   *
-   * @var \Symfony\Component\Console\Style\StyleInterface|\DrupenDrush8Io
-   */
-  protected $io;
-
-  /**
-   * The translation function akin to t().
-   *
-   * @var callable
-   */
-  protected $translation_function;
-
-  /**
    * List all route entries as valid urls.
    *
    * @param array $options An associative array of options whose values come from cli, aliases, config, etc.
-   * @param \Symfony\Component\Console\Style\StyleInterface|\DrupenDrush8Io $io
-   *   The io interface of the cli tool calling the method.
-   * @param callable $t
-   *   The translation function akin to t().
    */
-  public function routeList(array $options = ['route-name' => null], $io, callable $t) {
-    $io->text($t('Listing all routes...'));
+  public function routeList(array $options = ['route-name' => null]) {
+    /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+    $drupenIo = \Drupal::service('drupen.io');
+    $drupenIo->io()->text($drupenIo->t('Listing all routes...'));
     $route_name = $options['route-name'] ?: FALSE;
     foreach ($this->buildRouteList($route_name) as $url) {
-      $io->text($t($url));
+      $drupenIo->io()->text($drupenIo->t($url));
     }
   }
 
@@ -45,17 +29,15 @@ class Drupen {
    * Test access to all route entries.
    *
    * @param array $options An associative array of options whose values come from cli, aliases, config, etc.
-   * @param \Symfony\Component\Console\Style\StyleInterface|\DrupenDrush8Io $io
-   *   The io interface of the cli tool calling the method.
-   * @param callable $t
-   *   The translation function akin to t().
    */
-  public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null], $io, callable $t) {
+  public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
+    /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+    $drupenIo = \Drupal::service('drupen.io');
     if ($options['response-code']) {
-      $io->text($t('Testing routes for \'@code\' HTTP response code.', ['@code' => $options['response-code']]));
+      $drupenIo->io()->text($drupenIo->t('Testing routes for \'@code\' HTTP response code.', ['@code' => $options['response-code']]));
     }
     else {
-      $io->text($t('Testing all routes.'));
+      $drupenIo->io()->text($drupenIo->t('Testing all routes.'));
     }
 
     foreach ($this->buildRouteList($options['route-name']) as $url) {
@@ -71,17 +53,8 @@ class Drupen {
    *   Username for login.
    * @param $password
    *   Password for login.
-   * @param \Symfony\Component\Console\Style\StyleInterface|\DrupenDrush8Io $io
-   *   The io interface of the cli tool calling the method.
-   * @param callable $t
-   *   The translation function akin to t().
    */
-  public function sessionCookie($username, $password, $io, callable $t) {
-    // Necessary step to leverage these methods within the closure below.
-    $this->io = $io;
-    /** @var callable translation_function */
-    $this->translation_function = $t;
-
+  public function sessionCookie($username, $password) {
     $url = Utils::renderLink('user.login');
     /** @var \GuzzleHttp\Client $client */
     $client = \Drupal::service('http_client');
@@ -99,9 +72,9 @@ class Drupen {
           'max'             => 5,
           'referer'         => true,
           'on_redirect'     => function($request, $response, $uri) {
-            // One way to get $t recognized as an available function, here.
-            $t = $this->translation_function;
-            $this->io->text($t($response->getHeader('Set-Cookie')[0]));
+            /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+            $drupenIo = \Drupal::service('drupen.io');
+            $drupenIo->io()->text($drupenIo->t($response->getHeader('Set-Cookie')[0]));
           },
           'track_redirects' => true
         ],

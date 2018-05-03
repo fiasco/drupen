@@ -1,6 +1,8 @@
 services:
   drupen.drupen:
     class: Drupal\drupen\Drupen
+  drupen.io:
+    class: Drupal\drupen\Utils\DrupenIo
   drupen.route.handler.manager:
     class: Drupal\drupen\RouteHandler\Manager
     tags:

@@ -36,7 +36,9 @@ class UrlLoader {
    */
   public function loadURL($url) {
     if (drush_get_context('DRUSH_VERBOSE')) {
-      //$this->logger()->info('HTTP Request: @url.', ['@url' => $url]);
+      /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+      $drupenIo = \Drupal::service('drupen.io');
+      $drupenIo->io()->text($drupenIo->t('HTTP Request: @url.', ['@url' => $url]));
     }
 
     /** @var \GuzzleHttp\Client $client */
@@ -77,7 +79,9 @@ class UrlLoader {
           }
 
           if ($this->profile) {
-            drush_print(dt('@code, @time, @cache, @url', [
+            /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+            $drupenIo = \Drupal::service('drupen.io');
+            $drupenIo->io()->text($drupenIo->t('@code, @time, @cache, @url', [
               '@code' => $code,
               '@time' => $time,
               '@cache' => $cache,
@@ -85,7 +89,9 @@ class UrlLoader {
             ]));
           }
           else {
-            drush_print(dt('@code, @url', [
+            /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+            $drupenIo = \Drupal::service('drupen.io');
+            $drupenIo->io()->text($drupenIo->t('@code, @url', [
               '@code' => $code,
               '@url' => $url,
             ]));

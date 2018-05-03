@@ -5,7 +5,6 @@ namespace Drush\Commands;
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Drush\Commands\DrushCommands;
-use Drupal\drupen\Drupen;
 use Drupal\drupen\DrupenServiceProvider;
 
 /**
@@ -27,6 +26,7 @@ class DrupenCommands extends DrushCommands {
   public function setupDrupenServices()
   {
     $this->addServicesToContainer();
+    \Drupal::service('drupen.io')->setupIo($this->io(), 'dt');
   }
 
   /**
@@ -49,9 +49,7 @@ class DrupenCommands extends DrushCommands {
    * @bootstrap DRUSH_BOOTSTRAP_DRUPAL_FULL
    */
   public function routeList(array $options = ['route-name' => null]) {
-    /** @var \Drupal\drupen\Drupen $drupen **/
-    $drupen = \Drupal::service('drupen.drupen');
-    $drupen->routeList($options, $this->io(), 'dt');
+    \Drupal::service('drupen.drupen')->routeList($options);
   }
 
   /**
@@ -78,9 +76,7 @@ class DrupenCommands extends DrushCommands {
    * @bootstrap DRUSH_BOOTSTRAP_DRUPAL_FULL
    */
   public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
-    /** @var \Drupal\drupen\Drupen $drupen **/
-    $drupen = \Drupal::service('drupen.drupen');
-    $drupen->routeTest($options, $this->io(), 'dt');
+    \Drupal::service('drupen.drupen')->routeTest($options);
   }
 
   /**
@@ -96,9 +92,7 @@ class DrupenCommands extends DrushCommands {
    * @bootstrap DRUSH_BOOTSTRAP_DRUPAL_FULL
    */
   public function sessionCookie($username, $password) {
-    /** @var \Drupal\drupen\Drupen $drupen **/
-    $drupen = \Drupal::service('drupen.drupen');
-    $drupen->sessionCookie($username, $password, $this->io(), 'dt');
+    \Drupal::service('drupen.drupen')->sessionCookie($username, $password);
   }
 
 }

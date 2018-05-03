@@ -44,7 +44,9 @@ class Utils {
     }
     catch (\Exception $e) {
       if (drush_get_context('DRUSH_VERBOSE')) {
-        //$this->logger()->error('Skipping @route: Error generating url.', ['@route' => $name]);
+        /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+        $drupenIo = \Drupal::service('drupen.io');
+        $drupenIo->io()->error($drupenIo->t('Skipping @route: Error generating url.', ['@route' => $name]));
       }
       return null;
     }

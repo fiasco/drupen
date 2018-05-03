@@ -61,6 +61,7 @@ function drupen_drush_command() {
  */
 function drupen_drush_init() {
   add_services_to_container();
+  \Drupal::service('drupen.io')->setupIo(new DrupenDrush8Io(), 'dt');
 }
 
 function drush_drupen_pre_route_list($profile = NULL) {
@@ -95,9 +96,7 @@ function add_services_to_container() {
  * Command argument complete callback.
  */
 function drush_drupen_route_list() {
-  /** @var \Drupal\drupen\Drupen $drupen **/
-  $drupen = \Drupal::service('drupen.drupen');
-  $drupen->routeList(get_command_options(), new DrupenDrush8Io(), 'dt');
+  \Drupal::service('drupen.drupen')->routeList(get_command_options());
 }
 
 
@@ -125,18 +124,14 @@ function drush_drupen_pre_route_test($profile = NULL) {
  * Command argument complete callback.
  */
 function drush_drupen_route_test() {
-  /** @var \Drupal\drupen\Drupen $drupen **/
-  $drupen = \Drupal::service('drupen.drupen');
-  $drupen->routeTest(get_command_options(), new DrupenDrush8Io(), 'dt');
+  \Drupal::service('drupen.drupen')->routeTest(get_command_options());
 }
 
 /**
  * Command argument complete callback.
  */
 function drush_drupen_session_cookie($username = '', $password = '') {
-  /** @var \Drupal\drupen\Drupen $drupen **/
-  $drupen = \Drupal::service('drupen.drupen');
-  $drupen->sessionCookie($username, $password, new DrupenDrush8Io(), 'dt');
+  \Drupal::service('drupen.drupen')->sessionCookie($username, $password);
 }
 
 /**
