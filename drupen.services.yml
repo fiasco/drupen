@@ -3,6 +3,8 @@ services:
     class: Drupal\drupen\Drupen
   drupen.io:
     class: Drupal\drupen\Utils\DrupenIo
+  drupen.batch:
+    class: Drupal\drupen\Utils\DrupenBatch
   drupen.route.handler.manager:
     class: Drupal\drupen\RouteHandler\Manager
     tags:

@@ -4,6 +4,7 @@ namespace Drupal\drupen;
 
 use Drupal\drupen\Utils\UrlLoader;
 use Drupal\drupen\Utils\Utils;
+use Drupal\drupen\Utils\DrupenBatch;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\RouteCollection;
@@ -32,18 +33,42 @@ class Drupen {
    */
   public function routeTest(array $options = ['route-name' => null, 'response-code' => null, 'response-cache' => null, 'profile' => null, 'cookie' => null, 'verify-ssl' => null, 'follow-redirects' => null]) {
     /** @var \Drupal\drupen\Utils\DrupenIo $drupenIo */
+    $batch_size = 10;
+    $route_list = array();
+    foreach ($this->buildRouteList($options['route-name']) as $url) {
+      array_push($route_list, $url);
+    }
+    $chunks = array_chunk($route_list, $batch_size);
+    $total = count($route_list);
+    $progress = 0;
+
     $drupenIo = \Drupal::service('drupen.io');
     if ($options['response-code']) {
-      $drupenIo->io()->text($drupenIo->t('Testing routes for \'@code\' HTTP response code.', ['@code' => $options['response-code']]));
+      $drupenIo->io()->text($drupenIo->t('Testing ' . $total . ' routes for \'@code\' HTTP response code.', ['@code' => $options['response-code']]));
     }
     else {
-      $drupenIo->io()->text($drupenIo->t('Testing all routes.'));
+      $drupenIo->io()->text($drupenIo->t('Testing all ' . $total . ' routes.'));
     }
 
-    foreach ($this->buildRouteList($options['route-name']) as $url) {
-      $urlLoader = new UrlLoader($options['cookie'], $options['response-code'], $options['response-cache'], $options['profile'], $options['verify-ssl'], $options['follow-redirects']);
-      $urlLoader->loadURL($url);
+    foreach ($chunks as $chunk) {
+      $progress += count($chunk);
+      $operations[] = array(['Drupal\drupen\Utils\DrupenBatch',_drush_bg_callback_process_route_batch], array(
+        $chunk,
+        dt('@percent% (Processing @progress of @total)', array(
+          '@percent' => round(100 * $progress / $total),
+          '@progress' => $progress,
+          '@total' => $total,
+        )),$options),
+      );
     }
+    $batch = array(
+      'operations' => $operations,
+      'title' => dt('Route process callback batch'),
+      'finished' => ['Drupal\drupen\Utils\DrupenBatch',_drush_bg_callback_process_route_batch_finished],
+      'progress_message' => dt('@progress routes of @total were processed.'),
+    );
+    batch_set($batch);
+    drush_backend_batch_process();
   }
 
   /**
